@@ -1,0 +1,172 @@
+package com.sample
+ 
+import com.sample.DroolsTest.Message;
+import com.sample.Person;
+import com.sample.House;
+import java.util.ArrayList
+
+dialect "mvel"
+// rules tutorial
+// http://docs.jboss.org/drools/release/5.2.0.M2/drools-expert-docs/html/ch05.html#d0e2849
+ 
+
+rule "Houses all"
+    when
+        //$h: House( name == "Silvereta")
+       	$house : House(  )	
+    then
+        System.out.println( "another house found" );
+end
+
+rule "House silvereta rule"
+    when
+        //$h: House( name == "Silvereta")
+       	$house : House(  eval( name.equalsIgnoreCase( "Silvereta" ) ) )	
+    then
+        System.out.println( "a silvereta house found" );
+end
+
+
+
+rule "house has inhabitant christophe"
+    when
+    	$person: Person( name == "Christophe");
+    	$house: House( inhabitants contains $person );
+    then
+        System.out.println( "a house found with person: " + $person.name );
+end
+
+
+
+rule "house without inhabitant christophe"
+    when
+    	$person: Person( name == "Christophe");
+    	$house: House( inhabitants not contains $person ); 
+    then
+        System.out.println( "a house found without the person: " + $person.name );
+end
+
+
+//checken of een element in een array zit
+rule "is christophe a member of lakenestraat 114 inhabitants ?"
+    when
+    	$person: Person( name == "Christophe");
+    	$house: House( streetName == "Lakensestraat", houseNumber == 114 , $person memberOf inhabitants); 
+    then
+        System.out.println( "yes, christophe is a member of lakensestraat 114");
+end
+
+// Collect --> alle items die voldoen in een array stoppen
+rule "houses with address lakensestraat 114"
+    when
+    	$HousesList: ArrayList() 
+    		from collect( House( streetName == "Lakensestraat", houseNumber == 114));
+    then
+    	System.out.println("houses with address lakensestraat 114:");
+    	for (House house: $HousesList) {
+			System.out.println( "\t" + house );
+		}
+        
+end
+
+
+//eval heel belangrijk om list size te berekenen
+rule "Count inhabitants if more then 0"
+when
+    $house : House()
+    $inhabitantList : ArrayList() from collect (
+        Person(house == $house)
+    );  
+    eval($inhabitantList.size() > 0);
+then
+    System.out.println("house: " + $house.name
+        + " has  " + $inhabitantList.size() + " inhabitants");
+end
+
+
+
+// Accumulate --> alle items die voldoen in een array stoppen + extra
+rule "count houses with address lakensestraat 114"
+    when
+    	$HousesList: ArrayList() 
+    	$value : Number() 
+    	from accumulate( House( streetName == "Lakensestraat", houseNumber == $houseNumber: 114) , max( $houseNumber) );
+    then
+    	System.out.println( "value: " $value );
+        
+end
+
+//accumulate
+rule "total age af all inhabitants combined"
+    when
+   	$house : House()
+   	
+   	//only housese with inhabitants
+   	$inhabitantList : ArrayList() from collect (
+        Person(house == $house)
+    );  
+    eval($inhabitantList.size() > 0);
+    
+    $totalAge : Number() 
+             from accumulate( Person( house == $house, $age : age ),
+                              sum( $age ) )
+    then
+    	System.out.println( "total age af all inhabitants combined: " + $totalAge);
+        
+end
+
+//accumulate
+rule "eldest person for all houses"
+    when
+   	$house : House()
+   	
+   		//only housese with inhabitants
+   	$inhabitantList : ArrayList() from collect (
+        Person(house == $house)
+    );  
+    eval($inhabitantList.size() > 0);
+    
+    $maxAge : Number() 
+             from accumulate( Person( house == $house, $age : age ),
+                              max( $age ) )
+    then
+    	System.out.println( "eldest person in this house: " + $maxAge);
+        
+end
+
+
+//accumulate
+rule "count persons in houses"
+    when
+   	$house : House()
+  
+    
+    $count : Number()  
+             from accumulate( Person( house == $house ), count( ) )
+    then
+    	System.out.println(  "count persons in houses: " + $count);
+        
+end
+
+
+       
+
+
+
+
+
+
+///VOORBEELD ==> ALLE MOEDERS UIT PARIJS
+	//rule "Send a message to all mothers"
+	//when
+	//    $town : Town( name == 'Paris' )
+	//    $mothers : LinkedList() 
+	//               from collect( Person( gender == 'F', children > 0 ) 
+	//                             from $town.getPeople() 
+	//                           )
+	//then
+	//    # send a message to all mothers
+	//end
+	
+	
+
