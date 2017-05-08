@@ -3,6 +3,7 @@ package com.sample
 import com.sample.DroolsTest.Message;
 import com.sample.Person;
 import com.sample.House;
+import com.sample.Course;
 import java.util.ArrayList
 
 dialect "mvel"
@@ -70,7 +71,7 @@ rule "houses with address lakensestraat 114"
 end
 
 
-//eval heel belangrijk om list size te berekenen
+//eval heel belangrijk om list size te berekenen eb binnen de if statement te gebruiken
 rule "Count inhabitants if more then 0"
 when
     $house : House()
@@ -149,7 +150,20 @@ rule "count persons in houses"
 end
 
 
-       
+
+ rule "check required courses are planned"
+    when
+    	$courseToPlan: Course( name == "english", requiredCourse != null , $day: day, $requiredCourse: requiredCourse, $requiredCourseCount: requiredCourseCount);
+    	$count : Number()  
+                 from accumulate( Course( name == $requiredCourse, day < $day ), count( ) )
+		eval( $count < $requiredCourseCount)
+		
+    then
+    	//minpunten berekenen wan er zijn te weinig lessen ingepland
+        System.out.println( $count + " lessons of " + $requiredCourse +  " found before " + $courseToPlan.name + " on day " + $day + " (" + $requiredCourseCount + " needed)");
+end
+
+
 
 
 

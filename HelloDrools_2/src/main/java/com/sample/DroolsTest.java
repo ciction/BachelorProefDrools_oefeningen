@@ -1,8 +1,4 @@
 package com.sample;
-
-
-
-
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
@@ -45,6 +41,14 @@ public class DroolsTest {
             
             kSession.insert(personRaf);
             kSession.insert(personChristophe);
+            
+            Course math1_1 = new Course("math", 1);
+            Course math1_2 = new Course("math", 1);
+            Course english1 = new Course("english", 2, "math", 3);
+            kSession.insert(math1_1);
+            kSession.insert(math1_2);
+            kSession.insert(english1);
+            
 
             kSession.fireAllRules();
         } catch (Throwable t) {
